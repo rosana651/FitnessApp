@@ -1,10 +1,17 @@
 import { useState } from "react";
-import { uploadSquatVideo, uploadPlankVideo } from "../api/workout";
+import { uploadSquatVideo, uploadPlankVideo, uploadWidePushupVideo } from "../api/workout";
 
 const EXERCISES = [
   { id: "squat", label: "Приседания" },
   { id: "plank", label: "Планка" },
+  { id: "wide_pushup", label: "Отжимания (широкий хват)" },
 ];
+
+const UPLOAD_FUNC = {
+  squat: uploadSquatVideo,
+  plank: uploadPlankVideo,
+  wide_pushup: uploadWidePushupVideo,
+};
 
 export default function WorkoutPage() {
   const [exercise, setExercise] = useState(null);
@@ -23,10 +30,8 @@ async function handleSubmit(e) {
     setLoading(true);
 
     try {
-      const data =
-        exercise === "squat"
-          ? await uploadSquatVideo(file)
-          : await uploadPlankVideo(file);
+      const uploadFn = UPLOAD_FUNC[exercise];
+      const data = await uploadFn(file);
       
       setJobId(data.id);
 
@@ -373,6 +378,61 @@ async function handleSubmit(e) {
                 </div>
               )}
 
+              {exercise === "wide_pushup" && result.result && (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className="rounded-2xl bg-slate-50 p-5">
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                        Повторения
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-slate-900">
+                        {result.result.total_reps}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl bg-slate-50 p-5">
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                        Средний угол
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-slate-900">
+                        {result.result.avg_angle?.toFixed(1)}°
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl bg-slate-50 p-5">
+                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                        Минимальный угол
+                      </p>
+                      <p className="mt-2 text-2xl font-bold text-slate-900">
+                        {result.result.min_angle?.toFixed(1)}°
+                      </p>
+                    </div>
+
+                    {result.result.verdict_counts && (
+                      <div className="rounded-2xl border border-slate-200 p-5 sm:col-span-3">
+                        <p className="mb-4 text-sm font-semibold text-slate-800">
+                          Распределение по качеству
+                        </p>
+
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(result.result.verdict_counts).map(
+                            ([verdict, count]) => (
+                              <div
+                                key={verdict}
+                                className="rounded-xl bg-slate-100 px-4 py-2 text-sm text-slate-700"
+                              >
+                                <span className="font-medium">{verdict}</span>
+                                <span className="ml-2 text-slate-400">
+                                  {count}
+                                </span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              
               <button
                 type="button"
                 onClick={handleReset}

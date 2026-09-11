@@ -18,6 +18,15 @@ export const uploadPlankVideo = async (file) => {
     return response.data;
 };
 
+export const uploadWidePushupVideo = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post("/workouts/wide_pushup", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+    return response.data;
+};
+
 export const getWorkoutById = async (id) => {
     const response = await api.get(`/workouts/${id}`);
     return response.data;
