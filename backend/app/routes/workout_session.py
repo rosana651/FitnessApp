@@ -52,6 +52,19 @@ async def upload_wide_pushup(
     process_video_task.delay(str(workout_session.id), video_path, "wide_pushup")
     return workout_session
 
+@router.post("/close_grip_pushup")
+async def upload_close_grip_pushup(
+    file: UploadFile,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+) -> WorkoutSessionResponse:
+    video_path = await WorkoutService.save_video(file)
+    workout_session = await WorkoutService.create_workout_session(
+        db, current_user.id, "close_grip_pushup", video_path
+    )
+    process_video_task.delay(str(workout_session.id), video_path, "close_grip_pushup")
+    return workout_session
+
 @router.get("/history")  
 async def get_history(current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)) -> list[WorkoutSessionResponse]:
     return await WorkoutService.get_user_workout_sessions(db, current_user.id)

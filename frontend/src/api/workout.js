@@ -27,6 +27,15 @@ export const uploadWidePushupVideo = async (file) => {
     return response.data;
 };
 
+export const uploadCloseGripPushupVideo = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post("/workouts/close_grip_pushup", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    });
+    return response.data;
+};
+
 export const getWorkoutById = async (id) => {
     const response = await api.get(`/workouts/${id}`);
     return response.data;
