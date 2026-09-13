@@ -29,13 +29,13 @@ class PushUpTracker:
             self.max_angle_this_rep = max(self.max_angle_this_rep, angle)
             if angle < self.max_angle_this_rep - 5:
                 self.rep_count += 1
-                verdict = self._make_verdict(self.min_angle_this_rep)
+                verdict = self.make_verdict(self.min_angle_this_rep)
                 self.last_verdict = verdict
                 self.state = "up"
 
         return verdict
 
-    def _make_verdict(self, min_angle):
+    def make_verdict(self, min_angle):
         if min_angle > 90:
             verdict = "too_shallow"
         elif 70 <= min_angle <= 90:

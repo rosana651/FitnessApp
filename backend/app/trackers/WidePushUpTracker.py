@@ -4,33 +4,32 @@ class WidePushUpTracker:
     def __init__(self):
         self.state = "up"
         self.min_angle_this_rep = 180
-        self.max_angle_this_rep = 0
         self.rep_count = 0
         self.last_verdict = None
         self.rep_history = []
         self.angle_history_per_rep = []
 
-    def update(self, angle):
+    def update(self, angle, timestamp_ms=None):
         verdict = None
 
         if self.state == "up":
             if angle < 160:
                 self.state = "descending"
                 self.min_angle_this_rep = angle
-                self.max_angle_this_rep = angle
 
         elif self.state == "descending":
             self.min_angle_this_rep = min(self.min_angle_this_rep, angle)
-            self.max_angle_this_rep = max(self.max_angle_this_rep, angle)
             if angle > self.min_angle_this_rep + 5:
                 self.state = "ascending"
 
         elif self.state == "ascending":
-            self.max_angle_this_rep = max(self.max_angle_this_rep, angle)
-            if angle < self.max_angle_this_rep - 5:
-                self.rep_count += 1
-                verdict = self._make_verdict(self.min_angle_this_rep)
-                self.last_verdict = verdict
+            if angle > 150:
+                # засчитываем только если реально опускался
+                if self.min_angle_this_rep < 110:
+                    self.rep_count += 1
+                    verdict = self.make_verdict(self.min_angle_this_rep)
+                    self.last_verdict = verdict
+                    print(f"Rep {self.rep_count}: min_angle={self.min_angle_this_rep:.1f}, verdict={verdict}")
                 self.state = "up"
 
         return verdict

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { uploadSquatVideo, uploadPlankVideo, uploadWidePushupVideo } from "../api/workout";
+import { uploadSquatVideo, uploadPlankVideo, uploadWidePushupVideo, uploadCloseGripPushupVideo } from "../api/workout";
 
 const EXERCISES = [
   { id: "squat", label: "Приседания" },

@@ -6,13 +6,30 @@ import app.trackers.WidePushUpTracker as wu
 import app.trackers.CloseGripPushUpTracker as pu
 from mediapipe.framework.formats import landmark_pb2
 from app.pose_utils import calculate_angle, normalize_landmark, calculate_angle_3d, normalize_landmark_3d
-from app.configs.config_mp import pose_landmarker, mp_drawing, mp_pose, MIN_VISIBILITY
+from app.configs.config_mp import mp_drawing, mp_pose, MIN_VISIBILITY
+
+def create_pose_landmarker():
+    from mediapipe.tasks import python
+    from mediapipe.tasks.python import vision
+    import os
+
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    MODEL_PATH = os.path.join(BASE_DIR, "models_mp", "pose_landmarker_full.task")
+
+    base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
+    options = vision.PoseLandmarkerOptions(
+        base_options=base_options,
+        running_mode=vision.RunningMode.VIDEO,
+        num_poses=1
+    )
+    return vision.PoseLandmarker.create_from_options(options)
 
 def get_squat_video_report(video_path):
+    pose_landmarker = create_pose_landmarker()  
     squat_tracker = sp.SquatTracker()
     cap = cv2.VideoCapture(video_path)
     timestamp = 0
-    while cap.isOpened:
+    while cap.isOpened():
         success, frame = cap.read()
         if not success:
             break
@@ -54,15 +71,17 @@ def get_squat_video_report(video_path):
                     angle = calculate_angle(a, b, c)
                     squat_tracker.update(angle)
     cap.release()
+    pose_landmarker.close()
     
     report = squat_tracker.get_report()
     return report
 
 def get_plank_video_report(video_path):
+    pose_landmarker = create_pose_landmarker()  
     plank_tracker = pt.PlankTracker()
     cap = cv2.VideoCapture(video_path)
     timestamp = 0    
-    while cap.isOpened:
+    while cap.isOpened():
         success, frame = cap.read()
         if not success:
             break
@@ -75,14 +94,14 @@ def get_plank_video_report(video_path):
 
         if results.pose_landmarks:
             for pose in results.pose_landmarks:
-                pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-                for landmark in pose:
-                    pose_landmarks_proto.landmark.add(
-                        x=landmark.x,
-                        y=landmark.y,
-                        z=landmark.z,
-                        visibility=landmark.visibility
-                    )
+                # pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+                # for landmark in pose:
+                #     pose_landmarks_proto.landmark.add(
+                #         x=landmark.x,
+                #         y=landmark.y,
+                #         z=landmark.z,
+                #         visibility=landmark.visibility
+                #     )
                     
                 left_shoulder = pose[11]
                 left_hip = pose[23]
@@ -115,11 +134,13 @@ def get_plank_video_report(video_path):
                     plank_tracker.update(timestamp, angle)
                     
     cap.release()
+    pose_landmarker.close()
     
     result = plank_tracker.get_report()
     return result
 
 def get_wide_pushup_video_report(video_path):
+    pose_landmarker = create_pose_landmarker()  
     tracker = wu.WidePushUpTracker()
     cap = cv2.VideoCapture(video_path)
 
@@ -173,9 +194,11 @@ def get_wide_pushup_video_report(video_path):
                     tracker.update(angle)
 
     cap.release()
+    pose_landmarker.close()
     return tracker.get_report()
 
 def get_close_grip_pushup_video_report(video_path):
+    pose_landmarker = create_pose_landmarker()  
     pushup_tracker = pu.PushUpTracker()
     cap = cv2.VideoCapture(video_path)
 
@@ -222,4 +245,5 @@ def get_close_grip_pushup_video_report(video_path):
                     pushup_tracker.update(angle)
 
     cap.release()
+    pose_landmarker.close()
     return pushup_tracker.get_report()
