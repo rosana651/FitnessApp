@@ -39,9 +39,7 @@ async function handleSubmit(e) {
 
       const interval = setInterval(async () => {
         try {
-          const { getWorkoutById } = await import("../api/workout");
-          const session = await getWorkoutById(data.id);
-
+           
           if (session.status === "done") {
             clearInterval(interval);
             setResult(session);

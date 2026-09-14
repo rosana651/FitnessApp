@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+.auth-testimonials .swiper-pagination {
+  position: relative;
+  margin-top: 30px;
+}
+
+.auth-testimonials .swiper-pagination-bullet{
+  background: #400d73;
+  opacity: 1;
+}
+
+.auth-testimonials .swiper-pagination-bullet-active {
+  background: #c084fc;
+  opacity: 1;
+}

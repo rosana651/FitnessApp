@@ -4,6 +4,7 @@ import { login, register } from "../api/auth.js";
 import logo from "../assets/logo.png"
 import { Eye } from "lucide-react";
 import { ScanEye } from "lucide-react";
+import AuthReviewSlider from "../components/AuthReviewSlider.jsx";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -63,21 +64,16 @@ export default function AuthPage() {
               </div>
 
               <p className="mb-4 text-sm font-medium uppercase tracking-[0.25em] text-purple-400">
-                Fitness Analysis
+                Fitness App
               </p>
 
               <h1 className="max-w-md text-5xl font-bold leading-tight tracking-tight">
-                Анализируй.
+                Загружайте свои видео  и           
                 <br />
-                Тренируйся.
-                <br />
-                <span className="text-purple-400">Становись лучше.</span>
+                <span className="text-purple-400">Становитесь лучше</span>
               </h1>
 
-              <p className="mt-6 max-w-md text-base leading-7 text-slate-400">
-                Загружай видео своих тренировок и получай автоматический
-                анализ техники выполнения упражнений
-              </p>
+              <AuthReviewSlider/>
             </div>
           </div>
 
@@ -98,10 +94,6 @@ export default function AuthPage() {
               </div>
 
               <div className="mb-8">
-                <p className="mb-3 text-sm font-medium text-purple-400">
-                  Добро пожаловать
-                </p>
-
                 <h2 className="text-3xl font-bold tracking-tight text-white">
                   {mode === "login"
                     ? "С возвращением!"
