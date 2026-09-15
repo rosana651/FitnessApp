@@ -14,3 +14,29 @@
   background: #c084fc;
   opacity: 1;
 }
+
+.eye-icon {
+  transition: transform 0.15s ease;
+}
+
+.eye-icon:hover {
+  animation: blink 0.4s ease;
+}
+
+@keyframes blink {
+  0% {
+    transform: scaleY(1);
+  }
+
+  40% {
+    transform: scaleY(0.1);
+  }
+
+  70% {
+    transform: scaleY(1);
+  }
+
+  100% {
+    transform: scaleY(1);
+  }
+}

@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { RotateCcwClock, CirclePlus, ScanEye } from 'lucide-react';
+import TipsSlider from "../components/TipsSlider.jsx";
 import { me } from "../api/auth";
 
 export default function HomePage() {
@@ -16,33 +18,31 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+      <div className="flex min-h-screen items-center justify-center bg-[#08080c] text-white">
         <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-slate-900" />
-          <p className="text-sm text-slate-400">Загрузка…</p>
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-purple-500" />
+          <p className="text-sm text-slate-400">Загрузка</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10 sm:py-16">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
+    <div className="relative min-h-screen overflow-hidden bg-[#08080c] px-4 py-10 text-white sm:py-16">
+
+      {/* Фиолетовое свечение */}
+      <div className="pointer-events-none absolute -left-32 top-20 h-96 w-96 rounded-full bg-purple-600/10 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 right-0 h-96 w-96 rounded-full bg-violet-700/10 blur-3xl" />
+
+      <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col gap-8">
 
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-900 text-sm font-bold text-white shadow-sm">
-              AI
-            </div>
 
-            <div>
-              <p className="text-sm font-semibold text-slate-900">
-                Fitness App
-              </p>
-              <p className="text-xs text-slate-400">
-                AI Workout Analysis
-              </p>
+          <div className="flex items-center gap-3">
+
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-purple-400/20 bg-purple-500/10 text-sm font-bold text-purple-300">
+             <ScanEye size={20}/>
             </div>
           </div>
 
@@ -52,47 +52,51 @@ export default function HomePage() {
               localStorage.removeItem("access_token");
               navigate("/login");
             }}
-            className="rounded-xl hover:cursor-pointer border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-600 transition hover:text-slate-800 hover:bg-red-400"
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-400 transition hover:border-red-400/20 hover:bg-red-500/10 hover:text-red-300 hover:cursor-pointer"
           >
             Выйти
           </button>
+
         </div>
 
         {/* Приветствие */}
-        <div className="rounded-3xl bg-slate-900 p-7 text-white shadow-lg sm:p-9">
-          <div className="max-w-xl">
-            <p className="mb-3 text-sm font-medium text-slate-400">
-              Добро пожаловать 
+        <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-linear-to-br from-[#171126] via-[#101016] to-[#0d0d13] p-7 shadow-2xl shadow-purple-950/20 sm:p-9">
+
+          <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-purple-600/10 blur-3xl" />
+
+          <div className="relative max-w-xl">
+
+            <p className="mb-3 text-sm font-medium uppercase tracking-[0.2em] text-purple-400">
+              Fitness App
             </p>
 
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Привет, {user?.username}
+              С возвращением,{" "}
+              <span className="text-purple-400">
+                {user?.username}
+              </span>
             </h1>
 
-            <p className="mt-3 max-w-lg text-sm leading-6 text-slate-300">
-              Загрузи видео с упражнением и получи автоматический анализ
-              техники выполнения.
+            <p className="mt-3 max-w-lg text-sm leading-6 text-slate-400">
+              Загружайте свои видео и получайте оценку
             </p>
 
             <button
               type="button"
               onClick={() => navigate("/workouts")}
-              className="mt-6 rounded-xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 hover:cursor-pointer"
+              className="mt-6 rounded-xl bg-purple-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-purple-500 hover:cursor-pointer"
             >
-              Начать тренировку →
+              Начать тренировку 
             </button>
+
           </div>
         </div>
 
         {/* Заголовок секции */}
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">
-            Что хотите сделать?
-          </h2>
-
-          <p className="mt-1 text-sm text-slate-500">
+          <h2 className="text-xl font-semibold text-white">
             Выберите действие
-          </p>
+          </h2>
         </div>
 
         {/* Карточки действий */}
@@ -102,57 +106,69 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => navigate("/workouts")}
-            className="group flex min-h-52 flex-col rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-slate-300 hover:shadow-md hover:cursor-pointer"
+            className="group flex min-h-52 flex-col rounded-2xl border border-white/10 bg-[#101016] p-6 text-left shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-1 hover:border-purple-500/30 hover:bg-[#13131b] hover:shadow-purple-950/20 hover:cursor-pointer"
           >
-            <div className="flex items-start justify-between ">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-xl transition group-hover:bg-slate-900 group-hover:text-white">
-                +
+
+            <div className="flex items-start justify-between">
+
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-purple-400/20 bg-purple-500/10 text-xl text-purple-300 transition group-hover:bg-purple-600 group-hover:text-white">
+                <CirclePlus size={22}/>
               </div>
 
-              <span className="text-xl text-slate-300 transition group-hover:translate-x-1 group-hover:text-slate-600">
-                →
+              <span className="text-xl text-slate-600 transition group-hover:translate-x-1 group-hover:text-purple-400">
+                
               </span>
+
             </div>
 
             <div className="mt-auto pt-8">
-              <h3 className="font-semibold text-slate-900">
+
+              <h3 className="font-semibold text-white">
                 Новый анализ
               </h3>
 
-              <p className="mt-2 text-sm leading-5 text-slate-500">
+              <p className="mt-2 text-sm leading-5 text-slate-400">
                 Загрузить видео с приседаниями или планкой и проверить технику
               </p>
+
             </div>
+
           </button>
 
           {/* История */}
           <button
             type="button"
             onClick={() => navigate("/history")}
-            className="group flex min-h-52 flex-col rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-slate-300 hover:shadow-md hover:cursor-pointer"
+            className="group flex min-h-52 flex-col rounded-2xl border border-white/10 bg-[#101016] p-6 text-left shadow-lg shadow-black/20 transition-all duration-200 hover:-translate-y-1 hover:border-purple-500/30 hover:bg-[#13131b] hover:shadow-purple-950/20 hover:cursor-pointer"
           >
+
             <div className="flex items-start justify-between">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-xl transition group-hover:bg-slate-900 group-hover:text-white">
-                ◷
+
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-purple-400/20 bg-purple-500/10 text-xl text-purple-300 transition group-hover:bg-purple-600 group-hover:text-white">
+                <RotateCcwClock size={22}/>
               </div>
 
-              <span className="text-xl text-slate-300 transition group-hover:translate-x-1 group-hover:text-slate-600">
-                →
+              <span className="text-xl text-slate-600 transition group-hover:translate-x-1 group-hover:text-purple-400">
+                
               </span>
+
             </div>
 
             <div className="mt-auto pt-8">
-              <h3 className="font-semibold text-slate-900">
+
+              <h3 className="font-semibold text-white">
                 История тренировок
               </h3>
 
-              <p className="mt-2 text-sm leading-5 text-slate-500">
+              <p className="mt-2 text-sm leading-5 text-slate-400">
                 Посмотреть результаты прошлых анализов и отслеживать прогресс
               </p>
+
             </div>
+
           </button>
         </div>
-
+            <TipsSlider />
       </div>
     </div>
   );

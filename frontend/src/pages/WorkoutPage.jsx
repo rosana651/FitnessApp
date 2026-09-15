@@ -1,11 +1,32 @@
 import { useState } from "react";
-import { uploadSquatVideo, uploadPlankVideo, uploadWidePushupVideo, uploadCloseGripPushupVideo } from "../api/workout";
+import { uploadSquatVideo, uploadPlankVideo, uploadWidePushupVideo, uploadCloseGripPushupVideo, getWorkoutById,} from "../api/workout";
+import { CircleCheck, ScanEye, MoveRight, FileUp } from 'lucide-react';
+import ResultCard from "../components/ResultCard";
+import pushups from "../assets/pushups.png";
+import squat from "../assets/squat.png";
+import plank from "../assets/plank.png";
 
 const EXERCISES = [
-  { id: "squat", label: "Приседания" },
-  { id: "plank", label: "Планка" },
-  { id: "close_grip_pushup", label: "Отжимания (узкий хват)"},
-  { id: "wide_pushup", label: "Отжимания (широкий хват)" },
+  {
+    id: "squat",
+    label: "Приседания",
+    icon: squat,
+  },
+  {
+    id: "plank",
+    label: "Планка",
+    icon: plank,
+  },
+  {
+    id: "close_grip_pushup",
+    label: "Узкий хват",
+    icon: pushups,
+  },
+  {
+    id: "wide_pushup",
+    label: "Широкий хват",
+    icon: pushups,
+  },
 ];
 
 const UPLOAD_FUNC = {
@@ -21,10 +42,10 @@ export default function WorkoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
-  const [jobId, setJobId] = useState(null);
 
-async function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+
     if (!file || !exercise) return;
 
     setError("");
@@ -34,17 +55,18 @@ async function handleSubmit(e) {
     try {
       const uploadFn = UPLOAD_FUNC[exercise];
       const data = await uploadFn(file);
-      
-      setJobId(data.id);
 
       const interval = setInterval(async () => {
         try {
-           
+          const session = await getWorkoutById(data.id);
+
           if (session.status === "done") {
             clearInterval(interval);
             setResult(session);
             setLoading(false);
-          } else if (session.status === "failed") {
+          }
+
+          if (session.status === "failed") {
             clearInterval(interval);
             setError("Ошибка обработки видео");
             setLoading(false);
@@ -55,451 +77,436 @@ async function handleSubmit(e) {
           setLoading(false);
         }
       }, 3000);
-
     } catch (err) {
       const detail = err.response?.data?.detail;
-      setError(typeof detail === "string" ? detail : "Ошибка загрузки видео");
+
+      setError(
+        typeof detail === "string"
+          ? detail
+          : "Ошибка загрузки видео"
+      );
+
       setLoading(false);
     }
-}
+  }
 
   function handleReset() {
     setExercise(null);
     setFile(null);
     setResult(null);
-    setJobId(null);
     setError("");
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-12 sm:py-20">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
+    <div className="relative min-h-screen overflow-hidden bg-[#08080c] px-4 py-12 text-white sm:py-16">
 
-        {/* Заголовок */}
-        <div className="text-center">
-          <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-xl text-white shadow-lg">
-            AI
+      {/* Background glow */}
+      <div className="pointer-events-none absolute -left-40 top-0 h-125 w-125 rounded-full bg-purple-700/10 blur-[120px]" />
+
+      <div className="pointer-events-none absolute -bottom-40 right-0 h-125 w-125 rounded-full bg-violet-700/10 blur-[120px]" />
+
+      <div className="relative z-10 mx-auto w-full max-w-5xl">
+
+        {/* Header */}
+        <div className="mb-10 text-center">
+
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-purple-400/20 bg-purple-500/10 text-xl text-purple-300 shadow-[0_0_35px_rgba(168,85,247,0.12)]">
+              <ScanEye size={20}/>
           </div>
 
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-            Анализ упражнения
+          <p className="mb-2 text-xs font-medium uppercase tracking-[0.3em] text-purple-400">
+            Fitness App
+          </p>
+
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Анализ техники
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500">
-            Загрузите видео, а система автоматически оценит технику выполнения
-          </p>
+
         </div>
 
-        {/* Основная карточка */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+        {!result ? (
+          <>
 
-          {/* Прогресс */}
-          {!result && (
-            <div className="mb-8 flex items-center justify-center gap-3">
-              <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
-                  exercise
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-900 text-white"
-                }`}>
-                1
-              </div>
+            {/* Exercise section */}
+            <div className="mb-6 flex items-end justify-between">
 
-              <div className="h-px w-10 bg-slate-200 sm:w-16" />
-
-              <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold ${
-                  file
-                    ? "bg-slate-900 text-white"
-                    : "bg-slate-100 text-slate-400"
-                }`}>
-                  2
-                </div>
-
-              <div className="h-px w-10 bg-slate-200 sm:w-16" />
-
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-400">3</div>
-            </div>
-          )}
-
-          {!result && (
-            <>
-              {/* Шаг 1 */}
-              <div className="flex flex-col gap-4">
-                <div>
-                  <p className="text-base font-semibold text-slate-900">
-                    Выберите упражнение
-                  </p>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Что будем анализировать?
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {EXERCISES.map((ex) => (
-                    <button
-                      key={ex.id}
-                      type="button"
-                      onClick={() => {
-                        setExercise(ex.id);
-                        setFile(null);
-                        setError("");
-                      }}
-                      className={`group flex items-center gap-4 rounded-2xl border p-4 text-left transition-all duration-200 hover:cursor-pointer ${
-                        exercise === ex.id
-                          ? "border-slate-900 bg-slate-900 text-white shadow-md"
-                          : "border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-sm"
-                      }`}
-                    >
-                      <div
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg ${
-                          exercise === ex.id
-                            ? "bg-white/10"
-                            : "bg-slate-100"
-                        }`}
-                      >
-                        {ex.id === "squat" ? "🏋️" : "🧘"}
-                      </div>
-
-                      <div>
-                        <p className="font-medium">{ex.label}</p>
-                        <p
-                          className={`mt-0.5 text-xs ${
-                            exercise === ex.id
-                              ? "text-slate-300"
-                              : "text-slate-400"
-                          }`}
-                        >
-                          Анализ техники
-                        </p>
-                      </div>
-
-                      <div className="ml-auto text-lg opacity-50">
-                        →
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Шаг 2 */}
-              {exercise && (
-                <form
-                  onSubmit={handleSubmit}
-                  className="mt-8 flex flex-col gap-5"
-                >
-                  <div>
-                    <p className="text-base font-semibold text-slate-900">
-                      Загрузите видео
-                    </p>
-                    <p className="mt-1 text-sm text-slate-500">
-                      Лучше использовать видео хорошего качества
-                    </p>
-                  </div>
-
-                  <label
-                    className={`group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 text-center transition-all ${
-                      file
-                        ? "border-slate-900 bg-slate-50"
-                        : "border-slate-200 bg-slate-50/50 hover:border-slate-400 hover:bg-slate-50"
-                    }`}
-                  >
-                    <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
-                      {file ? "✓" : "↑"}
-                    </div>
-
-                    {file ? (
-                      <>
-                        <p className="max-w-full truncate px-4 text-sm font-medium text-slate-800">
-                          {file.name}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-400">
-                          Файл выбран
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium text-slate-700">
-                          Нажмите, чтобы выбрать видео
-                        </p>
-                        <p className="mt-1 text-xs text-slate-400">
-                          MP4, MOV, AVI и другие форматы
-                        </p>
-                      </>
-                    )}
-
-                    <input
-                      type="file"
-                      accept="video/*"
-                      required
-                      onChange={(e) => setFile(e.target.files[0])}
-                      className="hidden"
-                    />
-                  </label>
-
-                  {error && (
-                    <div className="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
-                      {error}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={loading || !file}
-                    className="flex h-12 items-center justify-center rounded-xl bg-slate-900 px-5 text-sm hover:cursor-pointer font-medium text-white shadow-sm transition-all hover:bg-slate-800 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2 
-                      ">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        Анализируем видео…
-                      </span>
-                    ) : (
-                      "Анализировать видео →"
-                    )}
-                  </button>
-                </form>
-              )}
-            </>
-          )}
-
-          {/* Шаг 3 */}
-          {result && (
-            <div className="flex flex-col gap-6">
-
-              <div className="text-center">
-                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-2xl text-emerald-600">
-                  ✓
-                </div>
-
-                <h2 className="text-2xl font-bold text-slate-900">
-                  Анализ завершён
+              <div>
+                <h2 className="text-lg font-semibold text-white">
+                  Выберите упражнение
                 </h2>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Результаты анализа вашего упражнения
+                  Доступно 4 вида анализа
                 </p>
               </div>
 
-              {/* Результат приседаний */}
-              {exercise === "squat" && result.result && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-2xl bg-slate-50 p-5">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Повторения
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-900">
-                      {result.result.total_reps}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-slate-50 p-5">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Средний угол
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-900">
-                      {result.result.avg_angle?.toFixed(1)}°
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl bg-slate-50 p-5">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Минимальный угол
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-900">
-                      {result.result.min_angle?.toFixed(1)}°
-                    </p>
-                  </div>
-
-                  {result.result.verdict_counts && (
-                    <div className="rounded-2xl border border-slate-200 p-5 sm:col-span-3">
-                      <p className="mb-4 text-sm font-semibold text-slate-800">
-                        Распределение по качеству
-                      </p>
-
-                      <div className="flex flex-wrap gap-2">
-                        {Object.entries(result.result.verdict_counts).map(
-                          ([verdict, count]) => (
-                            <div
-                              key={verdict}
-                              className="rounded-xl bg-slate-100 px-4 py-2 text-sm text-slate-700"
-                            >
-                              <span className="font-medium">{verdict}</span>
-                              <span className="ml-2 text-slate-400">
-                                {count}
-                              </span>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
+              {exercise && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setExercise(null);
+                    setFile(null);
+                    setError("");
+                  }}
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-purple-400/25 hover:bg-purple-500/25 hover:text-purple-400 hover:cursor-pointer"
+                >
+                  Изменить
+                </button>
               )}
 
-              {/* Результат планки */}
-              {exercise === "plank" && result.result && (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="rounded-2xl bg-slate-50 p-5">
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                      Общее время
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-slate-900">
-                      {result.result.total_seconds?.toFixed(1)} сек
-                    </p>
-                  </div>
+            </div>
 
-                  <div className="rounded-2xl bg-emerald-50 p-5">
-                    <p className="text-xs font-medium uppercase tracking-wide text-emerald-600">
-                      Хорошая техника
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-emerald-700">
-                      {result.result.good_form_seconds?.toFixed(1)} сек
-                    </p>
-                  </div>
+            {/* Exercise cards */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-                  <div className="rounded-2xl bg-red-50 p-5">
-                    <p className="text-xs font-medium uppercase tracking-wide text-red-500">
-                      Таз провисает
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-red-700">
-                      {result.result.hips_sagging_seconds?.toFixed(1)} сек
-                    </p>
-                  </div>
+              {EXERCISES.map((ex) => {
+                const selected = exercise === ex.id;
 
-                  <div className="rounded-2xl bg-amber-50 p-5">
-                    <p className="text-xs font-medium uppercase tracking-wide text-amber-600">
-                      Таз слишком высоко
-                    </p>
-                    <p className="mt-2 text-2xl font-bold text-amber-700">
-                      {result.result.hips_too_high_seconds?.toFixed(1)} сек
-                    </p>
-                  </div>
-                </div>
-              )}
+                return (
+                  <button
+                    key={ex.id}
+                    type="button"
+                    onClick={() => {
+                      setExercise(ex.id);
+                      setFile(null);
+                      setError("");
+                    }}
+                    className={`group relative overflow-hidden rounded-3xl border p-6 text-left transition-all duration-300 hover:cursor-pointer ${
+                      selected
+                        ? "border-purple-400/40 bg-purple-500/10 shadow-[0_0_35px_rgba(168,85,247,0.10)]"
+                        : "border-white/10 bg-[#101016] hover:-translate-y-1 hover:border-purple-400/25 hover:bg-[#13131b]"
+                    }`}
+                  >
 
-                {/* Результат широких отжиманий */}
-              {exercise === "wide_pushup" && result.result && (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <div className="rounded-2xl bg-slate-50 p-5">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                        Повторения
-                      </p>
-                      <p className="mt-2 text-2xl font-bold text-slate-900">
-                        {result.result.total_reps}
-                      </p>
-                    </div>
+                    {/* Decorative glow */}
+                    <div
+                      className={`absolute -right-10 -top-10 h-32 w-32 rounded-full blur-3xl transition-opacity ${
+                        selected
+                          ? "bg-purple-500/20 opacity-100"
+                          : "bg-purple-500/10 opacity-0 group-hover:opacity-100"
+                      }`}
+                    />
 
-                    <div className="rounded-2xl bg-slate-50 p-5">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                        Средний угол
-                      </p>
-                      <p className="mt-2 text-2xl font-bold text-slate-900">
-                        {result.result.avg_angle?.toFixed(1)}°
-                      </p>
-                    </div>
+                    <div className="relative">
 
-                    <div className="rounded-2xl bg-slate-50 p-5">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                        Минимальный угол
-                      </p>
-                      <p className="mt-2 text-2xl font-bold text-slate-900">
-                        {result.result.min_angle?.toFixed(1)}°
-                      </p>
-                    </div>
+                      <div className="mb-8 flex items-start justify-between">
 
-                    {result.result.verdict_counts && (
-                      <div className="rounded-2xl border border-slate-200 p-5 sm:col-span-3">
-                        <p className="mb-4 text-sm font-semibold text-slate-800">
-                          Распределение по качеству
-                        </p>
-
-                        <div className="flex flex-wrap gap-2">
-                          {Object.entries(result.result.verdict_counts).map(
-                            ([verdict, count]) => (
-                              <div
-                                key={verdict}
-                                className="rounded-xl bg-slate-100 px-4 py-2 text-sm text-slate-700"
-                              >
-                                <span className="font-medium">{verdict}</span>
-                                <span className="ml-2 text-slate-400">
-                                  {count}
-                                </span>
-                              </div>
-                            )
-                          )}
+                        <div
+                          className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl transition-all ${
+                            selected
+                              ? "bg-purple-500/20 shadow-[0_0_25px_rgba(168,85,247,0.15)]"
+                              : "bg-white/50 group-hover:bg-purple-500/45"
+                          }`}
+                        >
+                          <img
+                            src={ex.icon}
+                            alt={ex.label}
+                            className="h-10 w-10 object-contain"
+                          />
                         </div>
+
+                        <div
+                          className={`flex h-8 w-8 items-center justify-center rounded-full border transition-all ${
+                            selected
+                              ? "border-purple-400/40 bg-purple-500 text-white"
+                              : "border-white/10 text-slate-600 group-hover:border-purple-400/30 group-hover:text-purple-400"
+                          }`}
+                        >
+                          <MoveRight size={15}/>
+                        </div>
+
+                      </div>
+
+                      <h3 className="text-lg font-semibold text-white">
+                        {ex.label}
+                      </h3>
+
+                    </div>
+
+                  </button>
+                );
+              })}
+
+            </div>
+
+            {/* Upload */}
+            {exercise && (
+              <form
+                onSubmit={handleSubmit}
+                className="mt-6"
+              >
+
+                <div className="overflow-hidden rounded-3xl border border-white/10 bg-[#101016]">
+
+                  <div className="border-b border-white/5 px-6 py-5">
+                    <p className="text-sm font-semibold text-white">
+                      Загрузите видео
+                    </p>
+
+                    <p className="mt-1 text-xs text-slate-500">
+                      MP4, MOV, AVI и другие видеоформаты
+                    </p>
+                  </div>
+
+                  <div className="p-6">
+
+                    <label
+                      className={`group flex min-h-[190px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed transition-all ${
+                        file
+                          ? "border-purple-400/40 bg-purple-500/5"
+                          : "border-white/10 bg-white/2 hover:border-purple-400/30 hover:bg-purple-500/3"
+                      }`}
+                    >
+
+                      <div
+                        className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl transition-all ${
+                          file
+                            ? "bg-purple-500/15 text-purple-300"
+                            : "bg-white/5 text-slate-500 group-hover:bg-purple-500/10 group-hover:text-purple-300"
+                        }`}
+                      >
+                        {file ? <CircleCheck size={25}/> : <FileUp size={25}/>}
+                      </div>
+
+                      {file ? (
+                        <>
+                          <p className="max-w-md truncate px-4 text-sm font-medium text-white">
+                            {file.name}
+                          </p>
+
+                          <p className="mt-2 text-xs text-purple-400">
+                            Видео готово к анализу
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-medium text-slate-300">
+                            Нажмите, чтобы выбрать видео
+                          </p>
+
+                          <p className="mt-2 text-xs text-slate-500">
+                            Загрузите видео с хорошим освещением и
+                            видимым телом
+                          </p>
+                        </>
+                      )}
+
+                      <input
+                        type="file"
+                        accept="video/*"
+                        required
+                        onChange={(e) =>
+                          setFile(e.target.files[0])
+                        }
+                        className="hidden"
+                      />
+
+                    </label>
+
+                    {error && (
+                      <div className="mt-4 rounded-2xl border border-red-400/10 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                        {error}
                       </div>
                     )}
-                  </div>
-                )}
-                
-                {/* Результат узких отжиманий */}
-                {exercise === "pushup" && result.result && (
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                      <div className="rounded-2xl bg-slate-50 p-5">
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                              Повторения
-                          </p>
-                          <p className="mt-2 text-2xl font-bold text-slate-900">
-                              {result.result.total_reps}
-                          </p>
-                      </div>
 
-                      <div className="rounded-2xl bg-slate-50 p-5">
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                              Средний угол
-                          </p>
-                          <p className="mt-2 text-2xl font-bold text-slate-900">
-                              {result.result.avg_angle?.toFixed(1)}°
-                          </p>
-                      </div>
-
-                      <div className="rounded-2xl bg-slate-50 p-5">
-                          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                              Минимальный угол
-                          </p>
-                          <p className="mt-2 text-2xl font-bold text-slate-900">
-                              {result.result.min_angle?.toFixed(1)}°
-                          </p>
-                      </div>
-
-                      {result.result.verdict_counts && (
-                          <div className="rounded-2xl border border-slate-200 p-5 sm:col-span-3">
-                              <p className="mb-4 text-sm font-semibold text-slate-800">
-                                  Распределение по качеству
-                              </p>
-                              <div className="flex flex-wrap gap-2">
-                                  {Object.entries(result.result.verdict_counts).map(
-                                      ([verdict, count]) => (
-                                          <div
-                                              key={verdict}
-                                              className="rounded-xl bg-slate-100 px-4 py-2 text-sm text-slate-700"
-                                          >
-                                              <span className="font-medium">{verdict}</span>
-                                              <span className="ml-2 text-slate-400">{count}</span>
-                                          </div>
-                                      )
-                                  )}
-                              </div>
-                          </div>
+                    <button
+                      type="submit"
+                      disabled={loading || !file}
+                      className="mt-5 flex h-13 w-full items-center justify-center rounded-2xl bg-purple-500 px-5 text-sm font-semibold text-white shadow-lg shadow-purple-500/10 transition-all hover:cursor-pointer hover:bg-purple-400 hover:shadow-purple-500/20 disabled:cursor-not-allowed disabled:opacity-30"
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          Анализируем видео
+                        </span>
+                      ) : (
+                        "Запустить анализ "
                       )}
+                    </button>
+
                   </div>
-                )}
-              
-              <button
-                type="button"
-                onClick={handleReset}
-                className="h-12 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-700 transition hover:bg-slate-50 hover:cursor-pointer"
-              >
-                ← Загрузить другое видео
-              </button>
+                </div>
+
+              </form>
+            )}
+
+          </>
+        ) : (
+
+          /* ================= RESULT ================= */
+
+          <div className="rounded-3xl border border-white/10 bg-[#101016] p-6 shadow-2xl sm:p-8">
+
+            <div className="mb-8 flex flex-col items-center text-center">
+
+              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-emerald-400/20 bg-emerald-500/10 text-2xl text-emerald-400">
+                <CircleCheck size={25}/>
+              </div>
+
+              <p className="text-xs font-medium uppercase tracking-[0.25em] text-emerald-400">
+                Анализ выполнен
+              </p>
+
+              <h2 className="mt-2 text-3xl font-bold">
+                Результат анализа
+              </h2>
             </div>
-          )}
-        </div>
+
+            {/* SQUAT */}
+            {exercise === "squat" && result.result && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+                <ResultCard
+                  title="Повторения"
+                  value={result.result.total_reps}
+                />
+
+                <ResultCard
+                  title="Средний угол"
+                  value={`${result.result.avg_angle?.toFixed(1)}°`}
+                />
+
+                <ResultCard
+                  title="Минимальный угол"
+                  value={`${result.result.min_angle?.toFixed(1)}°`}
+                />
+
+                <VerdictCounts result={result.result} />
+
+              </div>
+            )}
+
+            {/* PLANK */}
+            {exercise === "plank" && result.result && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+
+                <ResultCard
+                  title="Общее время"
+                  value={`${result.result.total_seconds?.toFixed(1)} сек`}
+                />
+
+                <ResultCard
+                  title="Хорошая техника"
+                  value={`${result.result.good_form_seconds?.toFixed(1)} сек`}
+                  type="success"
+                />
+
+                <ResultCard
+                  title="Таз провисает"
+                  value={`${result.result.hips_sagging_seconds?.toFixed(1)} сек`}
+                  type="danger"
+                />
+
+                <ResultCard
+                  title="Таз слишком высоко"
+                  value={`${result.result.hips_too_high_seconds?.toFixed(1)} сек`}
+                  type="warning"
+                />
+
+              </div>
+            )}
+
+            {/* WIDE PUSHUP */}
+            {exercise === "wide_pushup" && result.result && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+                <ResultCard
+                  title="Повторения"
+                  value={result.result.total_reps}
+                />
+
+                <ResultCard
+                  title="Средний угол"
+                  value={`${result.result.avg_angle?.toFixed(1)}°`}
+                />
+
+                <ResultCard
+                  title="Минимальный угол"
+                  value={`${result.result.min_angle?.toFixed(1)}°`}
+                />
+
+                <VerdictCounts result={result.result} />
+
+              </div>
+            )}
+
+            {/* CLOSE PUSHUP */}
+            {exercise === "close_grip_pushup" && result.result && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+                <ResultCard
+                  title="Повторения"
+                  value={result.result.total_reps}
+                />
+
+                <ResultCard
+                  title="Средний угол"
+                  value={`${result.result.avg_angle?.toFixed(1)}°`}
+                />
+
+                <ResultCard
+                  title="Минимальный угол"
+                  value={`${result.result.min_angle?.toFixed(1)}°`}
+                />
+
+                <VerdictCounts result={result.result} />
+
+              </div>
+            )}
+
+            <button
+              type="button"
+              onClick={handleReset}
+              className="mt-7 h-12 w-full rounded-2xl border border-white/10 bg-white/3 text-sm font-medium text-slate-300 transition hover:cursor-pointer hover:border-purple-400/20 hover:bg-purple-500/[0.05] hover:text-white"
+            >
+             Новый анализ
+            </button>
+
+          </div>
+        )}
 
       </div>
     </div>
   );
 }
 
+/* ================= VERDICTS ================= */
+
+function VerdictCounts({ result }) {
+  if (!result.verdict_counts) return null;
+
+  return (
+    <div className="rounded-3xl border border-white/10 bg-white/2 p-6 sm:col-span-3">
+
+      <div className="mb-5">
+        <p className="text-sm font-semibold text-white">
+          Качество выполнения
+        </p>
+
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+
+        {Object.entries(result.verdict_counts).map(
+          ([verdict, count]) => (
+            <div
+              key={verdict}
+              className="rounded-2xl border border-white/10 bg-white/3 px-5 py-3"
+            >
+              <span className="text-sm text-slate-300">
+                {verdict}
+              </span>
+
+              <span className="ml-3 font-semibold text-purple-400">
+                {count}
+              </span>
+            </div>
+          )
+        )}
+
+      </div>
+
+    </div>
+  );
+}

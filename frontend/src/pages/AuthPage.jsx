@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { login, register } from "../api/auth.js";
 import logo from "../assets/logo.png"
-import { Eye } from "lucide-react";
-import { ScanEye } from "lucide-react";
+import { ScanEye, Eye } from "lucide-react";
 import AuthReviewSlider from "../components/AuthReviewSlider.jsx";
 
 export default function AuthPage() {
