@@ -29,7 +29,6 @@ class WidePushUpTracker:
                     self.rep_count += 1
                     verdict = self.make_verdict(self.min_angle_this_rep)
                     self.last_verdict = verdict
-                    print(f"Rep {self.rep_count}: min_angle={self.min_angle_this_rep:.1f}, verdict={verdict}")
                 self.state = "up"
 
         return verdict

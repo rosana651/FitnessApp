@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { uploadSquatVideo, uploadPlankVideo, uploadWidePushupVideo, uploadCloseGripPushupVideo, getWorkoutById,} from "../api/workout";
-import { CircleCheck, ScanEye, MoveRight, FileUp } from 'lucide-react';
+import { CircleCheck, ScanEye, MoveRight, FileUp } from "lucide-react";
 import ResultCard from "../components/ResultCard";
+import VerdictCounts from "../components/VerdictCounts";
+import VideoRequirementsPopUp from "../components/VideoRequirementsPopUp";
 import pushups from "../assets/pushups.png";
 import squat from "../assets/squat.png";
 import plank from "../assets/plank.png";
@@ -42,12 +44,9 @@ export default function WorkoutPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
+  const [showRequirements, setShowRequirements] = useState(false);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-
-    if (!file || !exercise) return;
-
+  async function handleUpload() {
     setError("");
     setResult(null);
     setLoading(true);
@@ -90,6 +89,22 @@ export default function WorkoutPage() {
     }
   }
 
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    if (!file || !exercise) return;
+
+    const hideRequirements =
+      localStorage.getItem("hide_video_requirements") === "true";
+
+    if (!hideRequirements) {
+      setShowRequirements(true);
+      return;
+    }
+
+    handleUpload();
+  }
+
   function handleReset() {
     setExercise(null);
     setFile(null);
@@ -121,7 +136,6 @@ export default function WorkoutPage() {
           <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Анализ техники
           </h1>
-
 
         </div>
 
@@ -458,54 +472,25 @@ export default function WorkoutPage() {
             <button
               type="button"
               onClick={handleReset}
-              className="mt-7 h-12 w-full rounded-2xl border border-white/10 bg-white/3 text-sm font-medium text-slate-300 transition hover:cursor-pointer hover:border-purple-400/20 hover:bg-purple-500/[0.05] hover:text-white"
+              className="mt-7 h-12 w-full rounded-2xl border border-white/10 bg-white/3 text-sm font-medium text-slate-300 transition hover:cursor-pointer hover:border-purple-400/20 hover:bg-purple-500/5 hover:text-white"
             >
-             Новый анализ
+              Новый анализ
             </button>
 
           </div>
         )}
 
       </div>
-    </div>
-  );
-}
 
-/* ================= VERDICTS ================= */
-
-function VerdictCounts({ result }) {
-  if (!result.verdict_counts) return null;
-
-  return (
-    <div className="rounded-3xl border border-white/10 bg-white/2 p-6 sm:col-span-3">
-
-      <div className="mb-5">
-        <p className="text-sm font-semibold text-white">
-          Качество выполнения
-        </p>
-
-      </div>
-
-      <div className="flex flex-wrap gap-3">
-
-        {Object.entries(result.verdict_counts).map(
-          ([verdict, count]) => (
-            <div
-              key={verdict}
-              className="rounded-2xl border border-white/10 bg-white/3 px-5 py-3"
-            >
-              <span className="text-sm text-slate-300">
-                {verdict}
-              </span>
-
-              <span className="ml-3 font-semibold text-purple-400">
-                {count}
-              </span>
-            </div>
-          )
-        )}
-
-      </div>
+      {showRequirements && (
+        <VideoRequirementsPopUp
+          onClose={() => setShowRequirements(false)}
+          onContinue={() => {
+            setShowRequirements(false);
+            handleUpload();
+          }}
+        />
+      )}
 
     </div>
   );

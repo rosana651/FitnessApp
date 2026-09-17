@@ -1,6 +1,6 @@
 import React from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination, Autoplay } from 'swiper/modules'
+import { Autoplay } from 'swiper/modules'
 
 import 'swiper/css'
 import 'swiper/css/pagination'
@@ -73,10 +73,9 @@ export default function TipsSlider() {
   return (
     <div className="w-full">
       <Swiper
-        modules={[Pagination, Autoplay]}
+        modules={[Autoplay]}
         slidesPerView={1}
         spaceBetween={20}
-        pagination={{ clickable: true }}
         autoplay={{
           delay: 5000,
           disableOnInteraction: false,

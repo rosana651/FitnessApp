@@ -17,20 +17,18 @@ class PushUpTracker:
             if angle < 160:
                 self.state = "descending"
                 self.min_angle_this_rep = angle
-                self.max_angle_this_rep = angle
 
         elif self.state == "descending":
             self.min_angle_this_rep = min(self.min_angle_this_rep, angle)
-            self.max_angle_this_rep = max(self.max_angle_this_rep, angle)
             if angle > self.min_angle_this_rep + 5:
                 self.state = "ascending"
 
         elif self.state == "ascending":
-            self.max_angle_this_rep = max(self.max_angle_this_rep, angle)
-            if angle < self.max_angle_this_rep - 5:
-                self.rep_count += 1
-                verdict = self.make_verdict(self.min_angle_this_rep)
-                self.last_verdict = verdict
+            if angle > 150:
+                if self.min_angle_this_rep < 110:  # реальное движение было
+                    self.rep_count += 1
+                    verdict = self.make_verdict(self.min_angle_this_rep)
+                    self.last_verdict = verdict
                 self.state = "up"
 
         return verdict
