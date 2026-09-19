@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /backend
 
-# Необходимы для opencv и mediapipe
+# Необходимы для OpenCV, MediaPipe и FFmpeg
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     libx11-6 \
     libxext6 \
     libxrender1 \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

@@ -11,11 +11,11 @@ class SquatTracker:
         self.angle_history_per_rep = []  # список минимальных углов по каждому повторению
                
     def make_verdict(self, min_angle):
-        if min_angle > 100:
+        if min_angle > 90:
             verdict = "Недостаточная глубина"
-        elif 80 <= min_angle <= 100:
+        elif 65 <= min_angle <= 90:
             verdict = "Глубина в норме"
-        elif min_angle < 80:
+        elif min_angle < 65:
             verdict = "Слишком глубокое"
         else:
             verdict = "unknown"

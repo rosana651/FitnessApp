@@ -1,6 +1,8 @@
 import uuid
 
+import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.tasks.video_tasks import process_video_task
 
@@ -87,3 +89,21 @@ async def delete_session(id: uuid.UUID, current_user: User = Depends(get_current
         raise HTTPException(status_code=403, detail="Нет доступа")
     await WorkoutService.delete_workout_session(db, id)
     return {"detail": "Удалено"}
+
+@router.get("/{id}/video")
+async def get_workout_video(
+    id: uuid.UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    workout = await WorkoutService.get_workout_session(db, id)
+    if workout is None:
+        raise HTTPException(status_code=404, detail="Сессия не найдена")
+    if workout.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Нет доступа")
+    
+    video_path = workout.result.get("processed_video_path")
+    if not video_path or not os.path.exists(video_path):
+        raise HTTPException(status_code=404, detail="Видео не найдено")
+    
+    return FileResponse(video_path, media_type="video/mp4")

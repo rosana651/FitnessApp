@@ -1,4 +1,58 @@
+import os
 import numpy as np
+import cv2
+from mediapipe.framework.formats import landmark_pb2
+import mediapipe as mp
+from app.configs.config_mp import mp_drawing, mp_pose
+import subprocess
+
+def create_video_writer(video_path, cap):
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    
+    # временный файл с mp4v кодеком
+    temp_path = video_path.replace("uploads/", "uploads/temp_")
+    # финальный файл с H.264 для браузера
+    output_path = video_path.replace("uploads/", "uploads/processed_")
+    
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = cv2.VideoWriter(temp_path, fourcc, fps, (width, height))
+    return out, temp_path, output_path
+
+
+def convert_to_h264(temp_path, output_path):
+    subprocess.run([
+        "ffmpeg",
+        "-y",
+        "-i", temp_path,
+        "-c:v", "libx264",
+        "-preset", "fast",
+        "-pix_fmt", "yuv420p",
+        "-c:a", "aac",
+        "-movflags", "+faststart",
+        output_path
+    ], check=True)
+
+    os.remove(temp_path)
+
+def draw_pose_landmarks(frame, pose): 
+    pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
+    for landmark in pose:
+        pose_landmarks_proto.landmark.add(
+            x=landmark.x,
+            y=landmark.y,
+            z=landmark.z,
+            visibility=landmark.visibility
+        )
+    
+    mp_drawing.draw_landmarks(
+        frame,
+        pose_landmarks_proto,
+        mp_pose.POSE_CONNECTIONS,
+        mp_drawing.DrawingSpec(color=(255, 255, 255), thickness=2, circle_radius=3),
+        mp_drawing.DrawingSpec(color=(128, 0, 255), thickness=2)
+    )
 
 def calculate_angle(a, b, c):  
     a = np.array(a)  
@@ -43,5 +97,6 @@ def normalize_landmark_3d(landmark, width, height):
     return (
         landmark.x * width,
         landmark.y * height,
-        landmark.z * width  # z масштабируем относительно ширины (стандартная практика)
+        landmark.z * width  # z масштабируем относительно ширины 
     )
+    

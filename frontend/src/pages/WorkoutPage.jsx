@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { uploadSquatVideo, uploadPlankVideo, uploadWidePushupVideo, uploadCloseGripPushupVideo, getWorkoutById,} from "../api/workout";
 import { CircleCheck, ScanEye, MoveRight, FileUp } from "lucide-react";
+import { api } from "../api/client";
 import ResultCard from "../components/ResultCard";
 import VerdictCounts from "../components/VerdictCounts";
 import VideoRequirementsPopUp from "../components/VideoRequirementsPopUp";
+import TechniqueExplanation from "../components/TechniqueExplanation";
 import pushups from "../assets/pushups.png";
 import squat from "../assets/squat.png";
 import plank from "../assets/plank.png";
+
 
 const EXERCISES = [
   {
@@ -45,6 +49,36 @@ export default function WorkoutPage() {
   const [error, setError] = useState("");
   const [result, setResult] = useState(null);
   const [showRequirements, setShowRequirements] = useState(false);
+  const [videoUrl, setVideoUrl] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+  async function loadVideo() {
+    try {
+      const response = await api.get(
+        `/workouts/${result.id}/video`,
+        {
+          responseType: "blob",
+        }
+      );
+
+      const url = URL.createObjectURL(response.data);
+      setVideoUrl(url);
+    } catch (error) {
+      console.error("Ошибка загрузки видео: ", error);
+    }
+  }
+
+  if (result?.id) {
+    loadVideo();
+  }
+
+    return () => {
+      if (videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+      }
+    };
+  }, [result?.id]);
 
   async function handleUpload() {
     setError("");
@@ -109,6 +143,7 @@ export default function WorkoutPage() {
     setExercise(null);
     setFile(null);
     setResult(null);
+    setVideoUrl(null);
     setError("");
   }
 
@@ -143,33 +178,24 @@ export default function WorkoutPage() {
           <>
 
             {/* Exercise section */}
-            <div className="mb-6 flex items-end justify-between">
+            <div className="mb-6 flex items-end justify-between gap-4">
 
-              <div>
-                <h2 className="text-lg font-semibold text-white">
-                  Выберите упражнение
-                </h2>
+                <div>
+                  <h2 className="text-lg font-semibold text-white">
+                    Выберите упражнение
+                  </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Доступно 4 вида анализа
-                </p>
-              </div>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Доступно 4 вида анализа
+                  </p>
+                </div>
 
-              {exercise && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setExercise(null);
-                    setFile(null);
-                    setError("");
-                  }}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200 transition hover:border-purple-400/25 hover:bg-purple-500/25 hover:text-purple-400 hover:cursor-pointer"
-                >
-                  Изменить
+                <button type="button" onClick={() => navigate("/")}
+                  className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:cursor-pointer hover:border-purple-400/20 hover:bg-purple-500/10 hover:text-white">
+                  Главная
                 </button>
-              )}
 
-            </div>
+              </div>
 
             {/* Exercise cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -369,6 +395,7 @@ export default function WorkoutPage() {
 
             {/* SQUAT */}
             {exercise === "squat" && result.result && (
+              <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
                 <ResultCard
@@ -387,14 +414,26 @@ export default function WorkoutPage() {
                 />
 
                 <VerdictCounts result={result.result} />
-
               </div>
+
+                <TechniqueExplanation exercise={exercise} result={result.result}/>
+
+                {result.result?.processed_video_path && (
+                  
+                <video
+                      controls
+                      className="w-full rounded-2xl"
+                      src={videoUrl}
+                  />
+              )}
+              </>         
             )}
 
             {/* PLANK */}
             {exercise === "plank" && result.result && (
+              <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
+                
                 <ResultCard
                   title="Общее время"
                   value={`${result.result.total_seconds?.toFixed(1)} сек`}
@@ -413,16 +452,28 @@ export default function WorkoutPage() {
                 />
 
                 <ResultCard
-                  title="Таз слишком высоко"
+                  title="Таз поднят высоко"
                   value={`${result.result.hips_too_high_seconds?.toFixed(1)} сек`}
                   type="warning"
                 />
-
               </div>
+
+                <TechniqueExplanation exercise={exercise} result={result.result}/>
+
+                {result.result?.processed_video_path && (
+                  
+                <video
+                      controls
+                      className="w-full rounded-2xl"
+                      src={videoUrl}
+                  />
+              )}
+              </>           
             )}
 
             {/* WIDE PUSHUP */}
             {exercise === "wide_pushup" && result.result && (
+              <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
                 <ResultCard
@@ -442,11 +493,24 @@ export default function WorkoutPage() {
 
                 <VerdictCounts result={result.result} />
 
+
               </div>
+                <TechniqueExplanation exercise={exercise} result={result.result}/>
+                
+                 {result.result?.processed_video_path && (
+                  
+                <video
+                      controls
+                      className="w-full rounded-2xl"
+                      src={videoUrl}
+                  />
+              )}
+              </>              
             )}
 
             {/* CLOSE PUSHUP */}
             {exercise === "close_grip_pushup" && result.result && (
+              <>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
                 <ResultCard
@@ -465,8 +529,19 @@ export default function WorkoutPage() {
                 />
 
                 <VerdictCounts result={result.result} />
-
               </div>
+
+               <TechniqueExplanation exercise={exercise} result={result.result}/>
+
+                {result.result?.processed_video_path && (
+                  
+                <video
+                      controls
+                      className="w-full rounded-2xl"
+                      src={videoUrl}
+                  />
+              )}
+              </>       
             )}
 
             <button

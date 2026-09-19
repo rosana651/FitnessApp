@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from fastapi.staticfiles import StaticFiles
 
 from app.configs.config import settings
 
@@ -19,6 +20,8 @@ async def lifespan(app: FastAPI):
     await engine.dispose()
 
 app = FastAPI(title="Fitness App", version="0.1.0", lifespan=lifespan)
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 _origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",")]

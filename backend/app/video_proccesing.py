@@ -5,7 +5,7 @@ import app.trackers.PlankTracker as pt
 import app.trackers.WidePushUpTracker as wu
 import app.trackers.CloseGripPushUpTracker as pu
 from mediapipe.framework.formats import landmark_pb2
-from app.pose_utils import calculate_angle, normalize_landmark, calculate_angle_3d, normalize_landmark_3d
+from app.pose_utils import calculate_angle, normalize_landmark, calculate_angle_3d, normalize_landmark_3d, draw_pose_landmarks, create_video_writer, convert_to_h264
 from app.configs.config_mp import mp_drawing, mp_pose, MIN_VISIBILITY
 
 def create_pose_landmarker():
@@ -27,8 +27,10 @@ def create_pose_landmarker():
 def get_squat_video_report(video_path):
     pose_landmarker = create_pose_landmarker()  
     squat_tracker = sp.SquatTracker()
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(video_path) 
+    out, temp_path, output_path = create_video_writer(video_path, cap)
     timestamp = 0
+    
     while cap.isOpened():
         success, frame = cap.read()
         if not success:
@@ -65,21 +67,29 @@ def get_squat_video_report(video_path):
                 b = normalize_landmark(knee, width, height)
                 c = normalize_landmark(ankle, width, height)
 
-                if best_visibility < MIN_VISIBILITY:
-                    pass
-                else:
+                if best_visibility >= MIN_VISIBILITY:
                     angle = calculate_angle(a, b, c)
                     squat_tracker.update(angle)
+                    
+                draw_pose_landmarks(frame, pose)
+        out.write(frame)
+    
     cap.release()
+    out.release()             
     pose_landmarker.close()
     
-    report = squat_tracker.get_report()
-    return report
+    convert_to_h264(temp_path, output_path)
+    
+    result = squat_tracker.get_report()
+    result["processed_video_path"] = output_path 
+     
+    return result
 
 def get_plank_video_report(video_path):
     pose_landmarker = create_pose_landmarker()  
     plank_tracker = pt.PlankTracker()
     cap = cv2.VideoCapture(video_path)
+    out, temp_path, output_path = create_video_writer(video_path, cap)
     timestamp = 0    
     while cap.isOpened():
         success, frame = cap.read()
@@ -127,22 +137,29 @@ def get_plank_video_report(video_path):
                 b = normalize_landmark(hip, width, height)
                 c = normalize_landmark(ankle, width, height)
 
-                if best_visibility < MIN_VISIBILITY:
-                    pass
-                else:
+                if best_visibility >= MIN_VISIBILITY:
                     angle = calculate_angle(a, b, c)
                     plank_tracker.update(timestamp, angle)
-                    
+                
+                draw_pose_landmarks(frame, pose)
+            out.write(frame)  
+             
     cap.release()
+    out.release()
     pose_landmarker.close()
     
+    convert_to_h264(temp_path, output_path)
+    
     result = plank_tracker.get_report()
+    result["processed_video_path"] = output_path 
+    
     return result
 
 def get_wide_pushup_video_report(video_path):
     pose_landmarker = create_pose_landmarker()  
-    tracker = wu.WidePushUpTracker()
+    wide_pushup_tracker = wu.WidePushUpTracker()
     cap = cv2.VideoCapture(video_path)
+    out, temp_path, output_path = create_video_writer(video_path, cap)
 
     while cap.isOpened():
         success, frame = cap.read()
@@ -191,16 +208,27 @@ def get_wide_pushup_video_report(video_path):
 
                 if best_visibility >= MIN_VISIBILITY:
                     angle = calculate_angle_3d(a, b, c)
-                    tracker.update(angle)
+                    wide_pushup_tracker.update(angle)
+                
+                draw_pose_landmarks(frame, pose)
+            out.write(frame) 
 
     cap.release()
+    out.release()
+    
+    convert_to_h264(temp_path, output_path)
+    
     pose_landmarker.close()
-    return tracker.get_report()
+    result = wide_pushup_tracker.get_report()
+    result["processed_video_path"] = output_path 
+    
+    return result
 
 def get_close_grip_pushup_video_report(video_path):
     pose_landmarker = create_pose_landmarker()  
-    pushup_tracker = pu.PushUpTracker()
+    close_pushup_tracker = pu.PushUpTracker()
     cap = cv2.VideoCapture(video_path)
+    out, temp_path, output_path = create_video_writer(video_path, cap)
 
     while cap.isOpened():
         success, frame = cap.read()
@@ -242,8 +270,18 @@ def get_close_grip_pushup_video_report(video_path):
 
                 if best_visibility >= MIN_VISIBILITY:
                     angle = calculate_angle(a, b, c)
-                    pushup_tracker.update(angle)
+                    close_pushup_tracker.update(angle)
+                
+                draw_pose_landmarks(frame, pose)
+            out.write(frame) 
 
     cap.release()
+    out.release()
+    
+    convert_to_h264(temp_path, output_path)
+    
     pose_landmarker.close()
-    return pushup_tracker.get_report()
+    result = close_pushup_tracker.get_report()
+    result["processed_video_path"] = output_path 
+    
+    return result
