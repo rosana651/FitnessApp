@@ -137,7 +137,7 @@ export default function TechniqueExplanation({ exercise, result }) {
         {data.title}
       </h3>
 
-      <p className="mt-2 text-md leading-6 text-slate-400">
+      <p className="mt-2 text-md leading-6 text-slate-300">
         {data.description}
       </p>
 
@@ -164,7 +164,7 @@ export default function TechniqueExplanation({ exercise, result }) {
 
               </div>
 
-              <p className="mt-2 pl-3.5 text-sm leading-6 text-slate-400">
+              <p className="mt-2 pl-3.5 text-sm leading-6 text-slate-300">
                 {item.text}
               </p>
 

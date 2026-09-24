@@ -24,7 +24,13 @@ async def upload_squat(
     workout_session = await WorkoutService.create_workout_session(
         db, current_user.id, "squat", video_path
     )
-    process_video_task.delay(str(workout_session.id), video_path, "squat")
+    
+    process_video_task.delay(
+        str(workout_session.id), 
+        video_path, 
+        "squat"
+    )
+    
     return workout_session
 
 

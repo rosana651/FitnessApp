@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getWorkoutHistory, deleteWorkout } from "../api/workout";
+import { CircleCheck, ScanEye, MoveRight, RotateCcwClock } from "lucide-react";
+import pushups from "../assets/pushups.png";
+import squat from "../assets/squat.png";
+import plank from "../assets/plank.png";
+
 
 const EXERCISE_LABELS = {
   squat: "Приседания",
@@ -55,7 +60,7 @@ export default function HistoryPage() {
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-purple-400" />
           <p className="text-sm text-slate-500">
-            Загрузка истории…
+            Загрузка истории...
           </p>
         </div>
       </div>
@@ -83,10 +88,6 @@ export default function HistoryPage() {
             <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">
               История тренировок
             </h1>
-
-            <p className="mt-2 text-sm text-slate-500">
-              Все результаты ваших предыдущих анализов
-            </p>
           </div>
 
           <button
@@ -94,7 +95,7 @@ export default function HistoryPage() {
             onClick={() => navigate("/")}
             className="shrink-0 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-purple-400/20 hover:bg-purple-500/10 hover:text-white cursor-pointer"
           >
-            ← Главная
+            Главная
           </button>
 
         </div>
@@ -113,7 +114,7 @@ export default function HistoryPage() {
           <div className="flex flex-col items-center rounded-3xl border border-white/10 bg-[#101016] px-6 py-16 text-center shadow-2xl shadow-purple-950/10">
 
             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-white/5 bg-white/5 text-2xl text-slate-500">
-              ◷
+              <RotateCcwClock size={20}/>
             </div>
 
             <h2 className="text-lg font-semibold text-white">
@@ -130,7 +131,7 @@ export default function HistoryPage() {
               onClick={() => navigate("/workouts")}
               className="mt-6 rounded-xl bg-purple-600 px-5 py-3 text-sm font-medium text-white shadow-lg shadow-purple-500/10 transition hover:bg-purple-500 hover:shadow-purple-500/20 cursor-pointer"
             >
-              Загрузить первое видео →
+              Загрузить первое видео 
             </button>
 
           </div>
@@ -165,12 +166,18 @@ export default function HistoryPage() {
 
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/5 bg-white/5 text-lg">
-                    {session.exercise_type === "squat"
-                      ? "🏋️"
-                      : session.exercise_type === "plank"
-                        ? "🧘"
-                        : "💪"}
+                  <div className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl bg-white/70">
+                    <img
+                      src={
+                        session.exercise_type === "squat"
+                          ? squat
+                          : session.exercise_type === "plank"
+                            ? plank
+                            : pushups
+                      }
+                      alt=""
+                      className="h-11 w-11 object-contain"
+                    />
                   </div>
 
                   <div>
@@ -180,7 +187,7 @@ export default function HistoryPage() {
                         session.exercise_type}
                     </h2>
 
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-400">
                       {new Date(session.created_at).toLocaleString("ru-RU")}
                     </p>
 
@@ -205,8 +212,8 @@ export default function HistoryPage() {
                 session.result && (
                   <div className="mt-5 grid grid-cols-2 gap-3 border-t border-white/5 pt-5 sm:grid-cols-3">
 
-                    <div className="rounded-xl border border-white/5 bg-white/[0.025] p-4">
-                      <p className="text-xs text-slate-500">
+                    <div className="rounded-xl border border-white/5 bg-white/2 p-4">
+                      <p className="text-xs text-slate-400">
                         Повторения
                       </p>
 
@@ -215,8 +222,8 @@ export default function HistoryPage() {
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-white/5 bg-white/[0.025] p-4">
-                      <p className="text-xs text-slate-500">
+                    <div className="rounded-xl border border-white/5 bg-white/2 p-4">
+                      <p className="text-xs text-slate-400">
                         Средний угол
                       </p>
 
@@ -225,24 +232,35 @@ export default function HistoryPage() {
                       </p>
                     </div>
 
-                    <div className="col-span-2 rounded-xl border border-white/5 bg-white/[0.025] p-4 sm:col-span-1">
+                    <div className="col-span-2 rounded-xl border border-white/5 bg-white/2 p-4 sm:col-span-1">
 
-                      <p className="text-xs text-slate-500">
-                        Качество
+                      <p className="text-xs text-slate-400">
+                        Качество выполнения
                       </p>
 
                       <div className="mt-2 flex flex-wrap gap-1.5">
 
                         {session.result.verdict_counts &&
                           Object.entries(session.result.verdict_counts).map(
-                            ([verdict, count]) => (
-                              <span
-                                key={verdict}
-                                className="rounded-lg border border-white/5 bg-white/5 px-2 py-1 text-xs text-slate-400"
-                              >
-                                {verdict}: {count}
-                              </span>
-                            )
+                            ([verdict, count]) => {
+                              const labels = {
+                                too_shallow: "Недостаточная глубина",
+                                good_depth: "Глубина в норме",
+                                too_deep: "Слишком глубокое",
+                                "Недостаточная глубина": "Недостаточная глубина",
+                                "Глубина в норме": "Глубина в норме",
+                                "Слишком глубокое": "Слишком глубокое",
+                              };
+
+                              return (
+                                <span
+                                  key={verdict}
+                                  className="rounded-lg border border-white/5 bg-white/5 px-2 py-1 text-xs text-slate-400"
+                                >
+                                  {labels[verdict] ?? verdict}: {count}
+                                </span>
+                              );
+                            }
                           )}
 
                       </div>
@@ -258,7 +276,7 @@ export default function HistoryPage() {
                 session.result && (
                   <div className="mt-5 grid grid-cols-2 gap-3 border-t border-white/5 pt-5">
 
-                    <div className="rounded-xl border border-white/5 bg-white/[0.025] p-4">
+                    <div className="rounded-xl border border-white/5 bg-white/2 p-4">
                       <p className="text-xs text-slate-500">
                         Общее время
                       </p>
@@ -308,7 +326,7 @@ export default function HistoryPage() {
                 session.result && (
                   <div className="mt-5 grid grid-cols-2 gap-3 border-t border-white/5 pt-5 sm:grid-cols-3">
 
-                    <div className="rounded-xl border border-white/5 bg-white/[0.025] p-4">
+                    <div className="rounded-xl border border-white/5 bg-white/2 p-4">
                       <p className="text-xs text-slate-500">
                         Повторения
                       </p>
@@ -318,7 +336,7 @@ export default function HistoryPage() {
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-white/5 bg-white/[0.025] p-4">
+                    <div className="rounded-xl border border-white/5 bg-white/2 p-4">
                       <p className="text-xs text-slate-500">
                         Средний угол
                       </p>
@@ -328,24 +346,35 @@ export default function HistoryPage() {
                       </p>
                     </div>
 
-                    <div className="col-span-2 rounded-xl border border-white/5 bg-white/[0.025] p-4 sm:col-span-1">
+                    <div className="col-span-2 rounded-xl border border-white/5 bg-white/2 p-4 sm:col-span-1">
 
                       <p className="text-xs text-slate-500">
-                        Качество
+                        Качество выполнения
                       </p>
 
                       <div className="mt-2 flex flex-wrap gap-1.5">
 
                         {session.result.verdict_counts &&
                           Object.entries(session.result.verdict_counts).map(
-                            ([verdict, count]) => (
-                              <span
-                                key={verdict}
-                                className="rounded-lg border border-white/5 bg-white/5 px-2 py-1 text-xs text-slate-400"
-                              >
-                                {verdict}: {count}
-                              </span>
-                            )
+                            ([verdict, count]) => {
+                              const labels = {
+                                too_shallow: "Недостаточная глубина",
+                                good_depth: "Глубина в норме",
+                                too_deep: "Слишком глубокое",
+                                "Недостаточная глубина": "Недостаточная глубина",
+                                "Глубина в норме": "Глубина в норме",
+                                "Слишком глубокое": "Слишком глубокое",
+                              };
+
+                              return (
+                                <span
+                                  key={verdict}
+                                  className="rounded-lg border border-white/5 bg-white/5 px-2 py-1 text-xs text-slate-400"
+                                >
+                                  {labels[verdict] ?? verdict}: {count}
+                                </span>
+                              );
+                            }
                           )}
 
                       </div>
@@ -357,7 +386,7 @@ export default function HistoryPage() {
 
               {/* Failed */}
               {session.status === "failed" && (
-                <div className="mt-5 rounded-xl border border-red-400/10 bg-red-500/5 px-4 py-3">
+                <div className="mt-5 rounded-xl border border-red-400/10 bg-red-500/10 px-4 py-3">
                   <p className="text-sm text-red-400">
                     Не удалось обработать видео
                   </p>
@@ -370,7 +399,7 @@ export default function HistoryPage() {
                 <button
                   type="button"
                   onClick={() => handleDelete(session.id)}
-                  className="rounded-lg px-3 py-2 text-xs font-medium text-slate-500 transition hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
+                  className="rounded-xl px-3 py-2 text-xs font-medium border border-white/10 text-slate-400 transition hover:bg-red-500/10 hover:text-red-400 cursor-pointer"
                 >
                   Удалить
                 </button>
@@ -387,9 +416,9 @@ export default function HistoryPage() {
           <button
             type="button"
             onClick={() => navigate("/workouts")}
-            className="flex h-12 items-center justify-center rounded-xl bg-purple-600 text-sm font-semibold text-white shadow-lg shadow-purple-500/10 transition hover:bg-purple-500 hover:shadow-purple-500/20 cursor-pointer"
+            className="mt-7 h-12 w-full rounded-2xl border border-white/10 bg-white/5 text-sm font-medium text-slate-300 transition hover:cursor-pointer hover:border-purple-400/30 hover:bg-purple-500/15 hover:text-white"
           >
-            + Новый анализ
+            Новый анализ
           </button>
         )}
 

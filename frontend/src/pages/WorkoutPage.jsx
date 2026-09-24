@@ -164,7 +164,7 @@ export default function WorkoutPage() {
               <ScanEye size={20}/>
           </div>
 
-          <p className="mb-2 text-xs font-medium uppercase tracking-[0.3em] text-purple-400">
+          <p className="mb-2 text-sm font-medium uppercase tracking-[0.3em] text-purple-400">
             Fitness App
           </p>
 
@@ -185,7 +185,7 @@ export default function WorkoutPage() {
                     Выберите упражнение
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-300">
                     Доступно 4 вида анализа
                   </p>
                 </div>
@@ -236,7 +236,7 @@ export default function WorkoutPage() {
                           className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl transition-all ${
                             selected
                               ? "bg-purple-500/20 shadow-[0_0_25px_rgba(168,85,247,0.15)]"
-                              : "bg-white/50 group-hover:bg-purple-500/45"
+                              : "bg-white/70 group-hover:bg-purple-500"
                           }`}
                         >
                           <img
@@ -284,7 +284,7 @@ export default function WorkoutPage() {
                       Загрузите видео
                     </p>
 
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-slate-400">
                       MP4, MOV, AVI и другие видеоформаты
                     </p>
                   </div>
@@ -418,14 +418,17 @@ export default function WorkoutPage() {
 
                 <TechniqueExplanation exercise={exercise} result={result.result}/>
 
+                <h2 className="mt-3 text-center text-xl font-semibold text-white ">
+                  Результат анализа видео
+                </h2>
                 {result.result?.processed_video_path && (
                   
                 <video
                       controls
-                      className="w-full rounded-2xl"
+                      className="w-full rounded-2xl mt-5"
                       src={videoUrl}
                   />
-              )}
+                )}
               </>         
             )}
 
@@ -464,10 +467,10 @@ export default function WorkoutPage() {
                   
                 <video
                       controls
-                      className="w-full rounded-2xl"
+                      className="w-full rounded-2xl mt-5"
                       src={videoUrl}
                   />
-              )}
+                )}
               </>           
             )}
 
@@ -501,10 +504,10 @@ export default function WorkoutPage() {
                   
                 <video
                       controls
-                      className="w-full rounded-2xl"
+                      className="w-full rounded-2xl mt-5"
                       src={videoUrl}
                   />
-              )}
+                )}
               </>              
             )}
 
@@ -533,21 +536,22 @@ export default function WorkoutPage() {
 
                <TechniqueExplanation exercise={exercise} result={result.result}/>
 
-                {result.result?.processed_video_path && (
-                  
-                <video
-                      controls
-                      className="w-full rounded-2xl"
-                      src={videoUrl}
-                  />
-              )}
-              </>       
+                <h2>Вывод вашей техники:</h2>
+                  {result.result?.processed_video_path && (
+                    
+                    <video
+                          controls
+                          className="w-full rounded-2xl mt-5"
+                          src={videoUrl}
+                      />   
+                  )}
+                </>       
             )}
 
             <button
               type="button"
               onClick={handleReset}
-              className="mt-7 h-12 w-full rounded-2xl border border-white/10 bg-white/3 text-sm font-medium text-slate-300 transition hover:cursor-pointer hover:border-purple-400/20 hover:bg-purple-500/5 hover:text-white"
+              className="mt-7 h-12 w-full rounded-2xl border border-white/10 bg-white/5 text-sm font-medium text-slate-300 transition hover:cursor-pointer hover:border-purple-400/30 hover:bg-purple-500/15 hover:text-white"
             >
               Новый анализ
             </button>

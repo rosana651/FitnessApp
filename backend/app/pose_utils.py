@@ -100,3 +100,24 @@ def normalize_landmark_3d(landmark, width, height):
         landmark.z * width  # z масштабируем относительно ширины 
     )
     
+def draw_overlay(frame, width, exercise_type, tracker, angle=None):
+    if exercise_type in ("squat", "pushup", "wide_pushup"):
+        cv2.putText(frame, f"Повторений: {tracker.rep_count}", (width - 250, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+        cv2.putText(frame, f"Оценка: {tracker.last_verdict or '-'}", (width - 250, 80),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (128, 0, 255), 2)
+        cv2.putText(frame, f"Фаза: {tracker.state}", (width - 250, 120),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (200, 200, 200), 2)
+
+    elif exercise_type == "plank" and angle is not None:
+        if angle > 175:
+            status, color = "Таз слишком высоко", (0, 165, 255)
+        elif angle < 160:
+            status, color = "Таз провисает", (0, 0, 255)
+        else:
+            status, color = "Хорошая техника", (0, 255, 0)
+
+        cv2.putText(frame, status, (width - 300, 40),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+        cv2.putText(frame, f"Угол: {angle:.1f}", (width - 300, 80),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)

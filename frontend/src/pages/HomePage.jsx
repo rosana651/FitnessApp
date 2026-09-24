@@ -21,7 +21,7 @@ export default function HomePage() {
       <div className="flex min-h-screen items-center justify-center bg-[#08080c] text-white">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-purple-500" />
-          <p className="text-sm text-slate-400">Загрузка</p>
+          <p className="text-sm text-slate-400">Загрузка...</p>
         </div>
       </div>
     );

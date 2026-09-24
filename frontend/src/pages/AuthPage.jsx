@@ -69,7 +69,7 @@ export default function AuthPage() {
               <h1 className="max-w-md text-5xl font-bold leading-tight tracking-tight">
                 Загружайте свои видео  и           
                 <br />
-                <span className="text-purple-400">Становитесь лучше</span>
+                <span className="text-purple-400">cтановитесь лучше</span>
               </h1>
 
               <AuthReviewSlider/>
@@ -83,9 +83,6 @@ export default function AuthPage() {
 
               {/* Логотип для мобильной версии */}
               <div className="mb-8 flex items-center gap-3 lg:hidden">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-purple-600 text-lg font-bold shadow-lg shadow-purple-900/30">
-                  ✦
-                </div>
 
                 <span className="text-lg font-semibold">
                   Fitness App

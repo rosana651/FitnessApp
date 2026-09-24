@@ -85,7 +85,7 @@ export default function TipsSlider() {
       >
         {tips.map((tip) => (
           <SwiperSlide key={tip.id}>
-            <div className="min-h-40 rounded-2xl border border-white/15 bg-white/5 p-6">
+            <div className="min-h-40 rounded-2xl border border-white/15 bg-white/2 p-6">
               
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-purple-500/15 text-sm font-semibold text-purple-300">

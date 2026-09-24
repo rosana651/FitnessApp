@@ -5,7 +5,7 @@ import app.trackers.PlankTracker as pt
 import app.trackers.WidePushUpTracker as wu
 import app.trackers.CloseGripPushUpTracker as pu
 from mediapipe.framework.formats import landmark_pb2
-from app.pose_utils import calculate_angle, normalize_landmark, calculate_angle_3d, normalize_landmark_3d, draw_pose_landmarks, create_video_writer, convert_to_h264
+from app.pose_utils import calculate_angle, normalize_landmark, calculate_angle_3d, normalize_landmark_3d, draw_pose_landmarks, create_video_writer, convert_to_h264, draw_overlay
 from app.configs.config_mp import mp_drawing, mp_pose, MIN_VISIBILITY
 
 def create_pose_landmarker():
@@ -70,6 +70,7 @@ def get_squat_video_report(video_path):
                 if best_visibility >= MIN_VISIBILITY:
                     angle = calculate_angle(a, b, c)
                     squat_tracker.update(angle)
+                    draw_overlay(frame, width, "squat", squat_tracker)
                     
                 draw_pose_landmarks(frame, pose)
         out.write(frame)
@@ -103,16 +104,7 @@ def get_plank_video_report(video_path):
         results = pose_landmarker.detect_for_video(mp_image, timestamp)
 
         if results.pose_landmarks:
-            for pose in results.pose_landmarks:
-                # pose_landmarks_proto = landmark_pb2.NormalizedLandmarkList()
-                # for landmark in pose:
-                #     pose_landmarks_proto.landmark.add(
-                #         x=landmark.x,
-                #         y=landmark.y,
-                #         z=landmark.z,
-                #         visibility=landmark.visibility
-                #     )
-                    
+            for pose in results.pose_landmarks:                 
                 left_shoulder = pose[11]
                 left_hip = pose[23]
                 left_ankle = pose[27]
@@ -140,6 +132,7 @@ def get_plank_video_report(video_path):
                 if best_visibility >= MIN_VISIBILITY:
                     angle = calculate_angle(a, b, c)
                     plank_tracker.update(timestamp, angle)
+                    draw_overlay(frame, width, "plank", plank_tracker, angle=angle)
                 
                 draw_pose_landmarks(frame, pose)
             out.write(frame)  
@@ -209,6 +202,7 @@ def get_wide_pushup_video_report(video_path):
                 if best_visibility >= MIN_VISIBILITY:
                     angle = calculate_angle_3d(a, b, c)
                     wide_pushup_tracker.update(angle)
+                    draw_overlay(frame, width, "wide_pushup", wide_pushup_tracker)
                 
                 draw_pose_landmarks(frame, pose)
             out.write(frame) 
@@ -271,6 +265,7 @@ def get_close_grip_pushup_video_report(video_path):
                 if best_visibility >= MIN_VISIBILITY:
                     angle = calculate_angle(a, b, c)
                     close_pushup_tracker.update(angle)
+                    draw_overlay(frame, width, "close_grip_pushup", close_pushup_tracker)
                 
                 draw_pose_landmarks(frame, pose)
             out.write(frame) 
